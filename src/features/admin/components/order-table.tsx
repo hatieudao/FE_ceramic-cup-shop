@@ -3,7 +3,7 @@ import { Search, Filter, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 
-import { OrderStatus } from '../types/order';
+import { Order, OrderStatus } from '../types/order';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -24,7 +24,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   const filteredOrders = orders
     .filter((order) => {
       const matchesSearch =
-        order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
         order.id.includes(searchTerm);
       const matchesStatus =
         statusFilter === 'all' || order.status === statusFilter;
@@ -32,17 +32,19 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
     })
     .sort((a, b) => {
       if (sortField === 'total') {
-        return sortDirection === 'asc' ? a.total - b.total : b.total - a.total;
+        return sortDirection === 'asc'
+          ? a.totalPrice - b.totalPrice
+          : b.totalPrice - a.totalPrice;
       } else if (sortField === 'date') {
         return sortDirection === 'asc'
           ? new Date(a.date).getTime() - new Date(b.date).getTime()
           : new Date(b.date).getTime() - new Date(a.date).getTime();
       } else {
-        const aValue = a[sortField].toString().toLowerCase();
-        const bValue = b[sortField].toString().toLowerCase();
+        const aValue = a[sortField].toString()?.toLowerCase();
+        const bValue = b[sortField].toString()?.toLowerCase();
         return sortDirection === 'asc'
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+          ? aValue?.localeCompare(bValue)
+          : bValue?.localeCompare(aValue);
       }
     });
 
@@ -248,7 +250,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
+                filteredOrders?.map((order) => (
                   <motion.tr
                     key={order.id}
                     variants={rowVariants}
@@ -264,7 +266,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                       {new Date(order.date).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      ${order.total.toFixed(2)}
+                      ${order.totalPrice}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <span
@@ -365,9 +367,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Total</p>
-                    <p className="font-medium">
-                      ${selectedOrder.total.toFixed(2)}
-                    </p>
+                    <p className="font-medium">${selectedOrder.totalPrice}</p>
                   </div>
                 </div>
 
@@ -404,19 +404,19 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 bg-white">
-                        {selectedOrder.items.map((item) => (
+                        {selectedOrder.orderItems?.map((item) => (
                           <tr key={item.id}>
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
                               {item.name}
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
-                              ${item.price.toFixed(2)}
+                              ${item.price}
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
                               {item.quantity}
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
-                              ${(item.price * item.quantity).toFixed(2)}
+                              ${item.price * item.quantity}
                             </td>
                           </tr>
                         ))}

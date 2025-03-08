@@ -1,26 +1,44 @@
 import type React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
+import { paths } from '../../../config/paths';
+import { useUser } from '../../../lib/auth';
 import { useCart } from '../api/get-cart';
 import { useUpdateCartItemQuantity } from '../api/update-cart-item';
 
 export const CartList: React.FC = () => {
   const { data: cart, refetch } = useCart();
+  const user = useUser();
   const updateQuantityMutation = useUpdateCartItemQuantity();
-
+  const navigate = useNavigate();
   const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
     updateQuantityMutation.mutate({ itemId, quantity: newQuantity });
   };
   const [couponCode, setCouponCode] = useState<string>('');
-  const shippingRate = 20.0;
+  const shippingRate = 10.0;
 
-  const updateCart = (): void => {
-    console.log('Cart updated');
+  const handleProceedToCheckout = () => {
+    // if cart is empty, show message
+    if (cart?.cartItems?.length === 0) {
+      alert('Your cart is empty');
+      return;
+    }
+
+    // if not logged in, navigate to login page and add redirectTo to the query params
+    if (!user) {
+      navigate(
+        paths.auth.login.path + `?redirectTo=${paths.app.checkout.path}`,
+      );
+      return;
+    }
+
+    // if cart is not empty, proceed to checkout
+    if (cart?.cartItems?.length) {
+      navigate(paths.app.checkout.getHref());
+    }
   };
 
-  const applyCoupon = (): void => {
-    console.log('Applying coupon:', couponCode);
-  };
   const calculateSubtotal = (): number => {
     return (
       cart?.cartItems.reduce(
@@ -160,7 +178,10 @@ export const CartList: React.FC = () => {
             ${(calculateSubtotal() + shippingRate).toFixed(2)}
           </span>
         </div>
-        <button className="mt-4 w-full rounded bg-red-500 py-4 font-semibold text-white hover:bg-red-600">
+        <button
+          onClick={handleProceedToCheckout}
+          className="mt-4 w-full rounded bg-red-500 py-4 font-semibold text-white hover:bg-red-600"
+        >
           PROCEED TO CHECKOUT
         </button>
       </div>

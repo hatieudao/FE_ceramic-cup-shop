@@ -29,15 +29,17 @@ export const Header = () => {
         <Link to="/shop" className="text-gray-800 hover:text-gray-600">
           Shop
         </Link>
-        <Link to="/blog" className="text-gray-800 hover:text-gray-600">
-          Blog
-        </Link>
-        <Link to="/pages" className="text-gray-800 hover:text-gray-600">
-          Pages
-        </Link>
         <Link to="/contact" className="text-gray-800 hover:text-gray-600">
           Contact Us
         </Link>
+        {user?.data && (
+          <Link
+            to="/order-history"
+            className="text-gray-800 hover:text-gray-600"
+          >
+            Order History
+          </Link>
+        )}
       </nav>
 
       {/* Search and Cart */}

@@ -42,5 +42,13 @@ export const paths = {
       path: 'admin',
       getHref: () => '/admin',
     },
+    checkout: {
+      path: 'checkout',
+      getHref: () => '/checkout',
+    },
+    orderHistory: {
+      path: 'order-history',
+      getHref: () => '/order-history',
+    },
   },
 } as const;

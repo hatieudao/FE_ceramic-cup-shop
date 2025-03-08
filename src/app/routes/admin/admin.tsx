@@ -3,9 +3,8 @@ import { QueryClient } from '@tanstack/react-query';
 import { ContentLayout } from '@/components/layouts';
 
 import { Header } from '../../../components/layouts/header';
+import AdminDashboard from '../../../features/admin/components/admin-dashboard';
 import Footer from '../landing/footer';
-
-import AdminDashboard from './admin-dashboard';
 
 export const clientLoader = (queryClient: QueryClient) => async () => {};
 

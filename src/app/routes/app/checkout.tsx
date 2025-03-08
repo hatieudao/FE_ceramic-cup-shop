@@ -1,16 +1,17 @@
 import { QueryClient } from '@tanstack/react-query';
 
 import { ContentLayout } from '@/components/layouts';
-import { CartList } from '@/features/cart/components/cart-list';
+
+import CheckoutPage from '../../../features/checkout/components/checkout-page';
 
 export const clientLoader = (queryClient: QueryClient) => async () => {};
 
-const CartRoute = () => {
+const CheckoutRoute = () => {
   return (
-    <ContentLayout title="Cart">
-      <CartList />
+    <ContentLayout title="Checkout">
+      <CheckoutPage />
     </ContentLayout>
   );
 };
 
-export default CartRoute;
+export default CheckoutRoute;

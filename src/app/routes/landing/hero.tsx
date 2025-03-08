@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MoveLeft, MoveRight } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { Link } from 'react-router';
 
 const slides = [
   {
@@ -136,18 +137,19 @@ const Hero: React.FC = () => {
               >
                 {slides[currentSlide].title}
               </motion.h2>
-
-              <motion.button
-                custom={4}
-                variants={contentVariants}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="border border-black px-8 py-3 font-medium transition-colors hover:bg-black hover:text-white"
-              >
-                SHOP NOW
-              </motion.button>
+              <Link to="/shop">
+                <motion.button
+                  custom={4}
+                  variants={contentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="border border-black px-8 py-3 font-medium transition-colors hover:bg-black hover:text-white"
+                >
+                  SHOP NOW
+                </motion.button>
+              </Link>
             </div>
           </div>
         </motion.div>

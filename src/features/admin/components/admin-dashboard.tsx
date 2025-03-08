@@ -2,13 +2,15 @@ import { motion } from 'framer-motion';
 import type React from 'react';
 import { useState } from 'react';
 
-import OrdersTable from '../../../features/admin/components/order-table';
-import ProductsTable from '../../../features/admin/components/products-table';
-import RevenueAnalytics from '../../../features/admin/components/revenue-analytic';
-import Sidebar from '../../../features/admin/components/sidebar';
-import { Order, OrderStatus } from '../../../features/admin/types/order';
-import { Product } from '../../../features/admin/types/product';
-import { Revenue } from '../../../features/admin/types/revenue';
+import { useOrders } from '../api/get-orders';
+import { Order, OrderStatus } from '../types/order';
+import { Product } from '../types/product';
+import { Revenue } from '../types/revenue';
+
+import OrdersTable from './order-table';
+import ProductsTable from './products-table';
+import RevenueAnalytics from './revenue-analytic';
+import Sidebar from './sidebar';
 
 // Sample data for orders
 const initialOrders: Order[] = [
@@ -16,65 +18,65 @@ const initialOrders: Order[] = [
     id: '1',
     customer: 'John Doe',
     date: '2023-05-15',
-    total: 129.99,
+    totalPrice: 129.99,
     status: 'pending',
-    items: [{ id: '1', name: 'Modern Chair', price: 129.99, quantity: 1 }],
+    orderItems: [{ id: '1', name: 'Modern Chair', price: 129.99, quantity: 1 }],
   },
   {
     id: '2',
     customer: 'Jane Smith',
     date: '2023-05-14',
-    total: 259.98,
+    totalPrice: 259.98,
     status: 'in-progress',
-    items: [{ id: '2', name: 'Wooden Table', price: 259.98, quantity: 1 }],
+    orderItems: [{ id: '2', name: 'Wooden Table', price: 259.98, quantity: 1 }],
   },
   {
     id: '3',
     customer: 'Robert Johnson',
     date: '2023-05-13',
-    total: 349.95,
+    totalPrice: 349.95,
     status: 'completed',
-    items: [{ id: '3', name: 'Leather Sofa', price: 349.95, quantity: 1 }],
+    orderItems: [{ id: '3', name: 'Leather Sofa', price: 349.95, quantity: 1 }],
   },
   {
     id: '4',
     customer: 'Emily Davis',
     date: '2023-05-12',
-    total: 89.99,
+    totalPrice: 89.99,
     status: 'cancelled',
-    items: [{ id: '4', name: 'Coffee Table', price: 89.99, quantity: 1 }],
+    orderItems: [{ id: '4', name: 'Coffee Table', price: 89.99, quantity: 1 }],
   },
   {
     id: '5',
     customer: 'Michael Wilson',
     date: '2023-05-11',
-    total: 199.99,
+    totalPrice: 199.99,
     status: 'pending',
-    items: [{ id: '5', name: 'Bookshelf', price: 199.99, quantity: 1 }],
+    orderItems: [{ id: '5', name: 'Bookshelf', price: 199.99, quantity: 1 }],
   },
   {
     id: '6',
     customer: 'Sarah Brown',
     date: '2023-05-10',
-    total: 149.99,
+    totalPrice: 149.99,
     status: 'in-progress',
-    items: [{ id: '6', name: 'Desk Lamp', price: 149.99, quantity: 1 }],
+    orderItems: [{ id: '6', name: 'Desk Lamp', price: 149.99, quantity: 1 }],
   },
   {
     id: '7',
     customer: 'David Miller',
     date: '2023-05-09',
-    total: 299.99,
+    totalPrice: 299.99,
     status: 'completed',
-    items: [{ id: '7', name: 'Office Chair', price: 299.99, quantity: 1 }],
+    orderItems: [{ id: '7', name: 'Office Chair', price: 299.99, quantity: 1 }],
   },
   {
     id: '8',
     customer: 'Lisa Taylor',
     date: '2023-05-08',
-    total: 179.99,
+    totalPrice: 179.99,
     status: 'pending',
-    items: [{ id: '8', name: 'Side Table', price: 179.99, quantity: 1 }],
+    orderItems: [{ id: '8', name: 'Side Table', price: 179.99, quantity: 1 }],
   },
 ];
 
@@ -225,24 +227,12 @@ const initialProducts: Product[] = [
 ];
 
 const AdminDashboard: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const { data: orders, isLoading } = useOrders({ page: 1, filters: {} });
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
-  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
-    setOrders(
-      orders.map((order) => {
-        if (order.id === orderId) {
-          // Only allow status changes for orders that are not completed or cancelled
-          if (order.status !== 'completed' && order.status !== 'cancelled') {
-            return { ...order, status: newStatus };
-          }
-        }
-        return order;
-      }),
-    );
-  };
+  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {};
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -313,7 +303,7 @@ const AdminDashboard: React.FC = () => {
           {/* Orders Content */}
           {activeTab === 'orders' && (
             <OrdersTable
-              orders={orders}
+              orders={orders?.data || []}
               updateOrderStatus={updateOrderStatus}
             />
           )}

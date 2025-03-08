@@ -11,7 +11,7 @@ export interface Order {
   id: string;
   customer: string;
   date: string;
-  total: number;
+  totalPrice: number;
   status: OrderStatus;
-  items: OrderItem[];
+  orderItems: OrderItem[];
 }

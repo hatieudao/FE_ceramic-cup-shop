@@ -20,5 +20,5 @@ export interface CartItem {
 
 export interface Cart {
   cartItems: CartItem[];
-  totalItems: number;
+  totalItem: number;
 }
