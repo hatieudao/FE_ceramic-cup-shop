@@ -2,6 +2,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 
+import { SERVER_IMAGE_URL } from '../../../types/product';
+
 interface ImageCarouselProps {
   images: string[];
   autoplay?: boolean;
@@ -107,7 +109,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
             }`}
           >
             <img
-              src={image || '/placeholder.svg'}
+              src={
+                image && image.startsWith('/uploads')
+                  ? SERVER_IMAGE_URL + image
+                  : image
+              }
               alt={`Slide ${index + 1}`}
               className="size-full object-cover"
             />

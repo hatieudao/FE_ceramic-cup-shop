@@ -2,6 +2,8 @@ import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import type React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 
+import { SERVER_IMAGE_URL } from '../../../types/product';
+
 type AnimationEffect = 'fade' | 'slide' | 'zoom' | 'flip';
 
 interface AdvancedImageCarouselProps {
@@ -162,7 +164,11 @@ const AdvancedImageCarousel: React.FC<AdvancedImageCarouselProps> = ({
             className={`absolute left-0 top-0 size-full ${getAnimationClasses(index)}`}
           >
             <img
-              src={image || '/placeholder.svg'}
+              src={
+                image && image.startsWith('/uploads')
+                  ? SERVER_IMAGE_URL + image
+                  : image
+              }
               alt={`Slide ${index + 1}`}
               className="size-full object-cover"
             />

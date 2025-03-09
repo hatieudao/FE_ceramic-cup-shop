@@ -1,11 +1,11 @@
 export interface ProductType {
   id: string;
-  createdAt: string;
   name: string;
   description: string;
   price: string;
   stock: number;
   imageUrl: string;
+  createdAt?: string;
 }
 
 export interface ProductTypeRelation {

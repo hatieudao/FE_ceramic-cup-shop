@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
+import { SERVER_IMAGE_URL } from '../../../types/product';
 import { useAddToCart } from '../../cart/api/add-cart-item';
 import { useCart } from '../../cart/api/use-cart';
 import { useProduct } from '../api/get-product';
@@ -120,7 +121,12 @@ const ProductDetailContent = ({
       <div className="relative bg-gray-100">
         {selectedType?.imageUrl ? (
           <img
-            src={selectedType.imageUrl}
+            src={
+              selectedType.imageUrl &&
+              selectedType.imageUrl.startsWith('/uploads')
+                ? SERVER_IMAGE_URL + selectedType.imageUrl
+                : selectedType.imageUrl
+            }
             alt={selectedType.name || 'Product'}
             className="h-auto w-full"
           />

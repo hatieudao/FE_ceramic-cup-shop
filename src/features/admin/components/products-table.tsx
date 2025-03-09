@@ -8,31 +8,46 @@ import {
   Edit,
   Trash,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { Product } from '../types/product';
+import { Product } from '@/types/product';
 
-interface ProductsTableProps {
-  products: Product[];
-}
+import { getImageUrl } from '../../../utils/get-image-url';
+import { useProductList } from '../api/get-product-list';
 
-const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
+import AddProductModal from './add-product-modal';
+
+const ProductsTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof Product>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 5;
+
+  const { data, isLoading, error } = useProductList({
+    page: currentPage,
+    perPage: productsPerPage,
+  });
+
+  const products = data?.data || [];
+  const totalPages = data?.meta?.totalPages || 1;
 
   // Filter and sort products
   const filteredProducts = products
-    .filter((product) => {
+    .filter((product: Product) => {
+      if (!searchTerm) return true;
       return (
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     })
-    .sort((a, b) => {
+    .sort((a: Product, b: Product) => {
       if (sortField === 'createdAt') {
         return sortDirection === 'asc'
           ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -46,6 +61,43 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
       }
     });
 
+  // Pagination logic
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct,
+  );
+
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  if (isLoading)
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 size-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <div className="text-center text-red-600">
+          <p>Error loading products.</p>
+          <p className="text-sm">Please try again later.</p>
+        </div>
+      </div>
+    );
+
   const handleSort = (field: keyof Product) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -53,6 +105,11 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
       setSortField(field);
       setSortDirection('asc');
     }
+  };
+
+  const handleAddProduct = (product: any) => {
+    // For demo purposes, we'll just log the product
+    console.log('Adding product:', product);
   };
 
   const tableVariants = {
@@ -103,7 +160,10 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
             Products Management
           </h2>
 
-          <button className="flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700">
+          <button
+            className="flex items-center rounded-md bg-indigo-600 px-4 py-2 text-white transition-colors hover:bg-indigo-700"
+            onClick={() => setShowAddModal(true)}
+          >
             <Plus size={18} className="mr-2" />
             Add Product
           </button>
@@ -222,8 +282,8 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
+              {currentProducts.length > 0 ? (
+                currentProducts.map((product) => (
                   <motion.tr
                     key={product.id}
                     variants={rowVariants}
@@ -236,12 +296,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
                       <div className="size-12 overflow-hidden rounded-md bg-gray-100">
                         {product.productTypes &&
                         product.productTypes.length > 0 &&
-                        product.productTypes[0].productType.imageUrl ? (
+                        product.productTypes[0].imageUrl ? (
                           <img
-                            src={
-                              product.productTypes[0].productType.imageUrl ||
-                              '/placeholder.svg'
-                            }
+                            src={getImageUrl(product.productTypes[0].imageUrl)}
                             alt={product.name}
                             className="size-full object-cover"
                           />
@@ -260,12 +317,12 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                       {product.productTypes && product.productTypes.length > 0
-                        ? `$${product.productTypes[0].productType.price}`
+                        ? `$${product.productTypes[0].price}`
                         : 'N/A'}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                       {product.productTypes && product.productTypes.length > 0
-                        ? product.productTypes[0].productType.stock
+                        ? product.productTypes[0].stock
                         : 'N/A'}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -306,6 +363,78 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {filteredProducts.length > 0 && (
+          <div className="mt-4 flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Showing{' '}
+                  <span className="font-medium">{indexOfFirstProduct + 1}</span>{' '}
+                  to{' '}
+                  <span className="font-medium">
+                    {indexOfLastProduct > filteredProducts.length
+                      ? filteredProducts.length
+                      : indexOfLastProduct}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium">{filteredProducts.length}</span>{' '}
+                  results
+                </p>
+              </div>
+              <div>
+                <nav
+                  className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                  aria-label="Pagination"
+                >
+                  <button
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className={`relative inline-flex items-center rounded-l-md p-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                      currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
+                    }`}
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft className="size-5" aria-hidden="true" />
+                  </button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (number) => (
+                      <button
+                        key={number}
+                        onClick={() => paginate(number)}
+                        className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                          currentPage === number
+                            ? 'bg-indigo-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                            : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    ),
+                  )}
+
+                  <button
+                    onClick={() =>
+                      paginate(Math.min(totalPages, currentPage + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className={`relative inline-flex items-center rounded-r-md p-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                      currentPage === totalPages
+                        ? 'cursor-not-allowed opacity-50'
+                        : ''
+                    }`}
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="size-5" aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Product Details Modal */}
@@ -334,12 +463,11 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
                   <div>
                     {selectedProduct.productTypes &&
                     selectedProduct.productTypes.length > 0 &&
-                    selectedProduct.productTypes[0].productType.imageUrl ? (
+                    selectedProduct.productTypes[0].imageUrl ? (
                       <img
-                        src={
-                          selectedProduct.productTypes[0].productType
-                            .imageUrl || '/placeholder.svg'
-                        }
+                        src={getImageUrl(
+                          selectedProduct.productTypes[0].imageUrl,
+                        )}
                         alt={selectedProduct.name}
                         className="h-64 w-full rounded-md bg-gray-100 object-contain"
                       />
@@ -370,9 +498,9 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">Total Items</p>
+                        <p className="text-sm text-gray-500">Total Types</p>
                         <p className="font-medium">
-                          {selectedProduct.totalItem}
+                          {selectedProduct.productTypes.length}
                         </p>
                       </div>
                     </div>
@@ -416,16 +544,16 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
                           selectedProduct.productTypes.map((type) => (
                             <tr key={type.id}>
                               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-                                {type.productType.name}
+                                {type.name}
                               </td>
                               <td className="px-4 py-3 text-sm text-gray-500">
-                                {type.productType.description}
+                                {type.description}
                               </td>
                               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
-                                ${type.productType.price}
+                                ${type.price}
                               </td>
                               <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
-                                {type.productType.stock}
+                                {type.stock}
                               </td>
                             </tr>
                           ))}
@@ -450,6 +578,12 @@ const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+      />
     </motion.div>
   );
 };

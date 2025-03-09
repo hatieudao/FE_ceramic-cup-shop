@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import type React from 'react';
 import { useState } from 'react';
 
+import { useProducts } from '../../shopping/api/get-products';
 import { useOrders } from '../api/get-orders';
 import { Order, OrderStatus } from '../types/order';
 import { Product } from '../types/product';
@@ -230,7 +231,6 @@ const AdminDashboard: React.FC = () => {
   const { data: orders, isLoading } = useOrders({ page: 1, filters: {} });
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
 
   const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {};
 
@@ -309,7 +309,7 @@ const AdminDashboard: React.FC = () => {
           )}
 
           {/* Products Content */}
-          {activeTab === 'products' && <ProductsTable products={products} />}
+          {activeTab === 'products' && <ProductsTable />}
 
           {/* Customers Content */}
           {activeTab === 'customers' && (

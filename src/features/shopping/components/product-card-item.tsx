@@ -1,6 +1,7 @@
 import { Heart, ShoppingCart, Eye, Plus } from 'lucide-react';
 import { useState } from 'react';
 
+import { SERVER_IMAGE_URL } from '../../../types/product';
 import { useCart } from '../../cart/api/use-cart';
 
 import ProductDetailDialog from './product-detail-dialog';
@@ -21,7 +22,12 @@ const ProductCardItem = ({ product, viewMode }) => {
       <div className="flex overflow-hidden rounded-md border border-gray-200">
         <div className="relative w-1/3">
           <img
-            src={product?.imageUrls[0] || '/placeholder.svg'}
+            src={
+              product?.imageUrls[0] &&
+              product?.imageUrls[0].startsWith('/uploads')
+                ? SERVER_IMAGE_URL + product?.imageUrls[0]
+                : product?.imageUrls[0]
+            }
             alt={product.name}
             className="size-full object-cover"
           />
@@ -64,7 +70,12 @@ const ProductCardItem = ({ product, viewMode }) => {
     >
       <div className="relative aspect-square overflow-hidden">
         <img
-          src={product?.imageUrls[0] || '/placeholder.svg'}
+          src={
+            product?.imageUrls[0] &&
+            product?.imageUrls[0].startsWith('/uploads')
+              ? SERVER_IMAGE_URL + product?.imageUrls[0]
+              : product?.imageUrls[0]
+          }
           alt={product.name}
           className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
         />

@@ -16,3 +16,5 @@ export type Product = {
   isDeleted: boolean;
   productTypes: ProductType[];
 };
+
+export const SERVER_IMAGE_URL = 'http://localhost:5001';

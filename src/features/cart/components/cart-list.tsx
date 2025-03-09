@@ -41,7 +41,7 @@ export const CartList: React.FC = () => {
 
   const calculateSubtotal = (): number => {
     return (
-      cart?.cartItems.reduce(
+      cart?.cartItems?.reduce(
         (total, item) => total + parseFloat(item.price) * item.quantity,
         0,
       ) || 0

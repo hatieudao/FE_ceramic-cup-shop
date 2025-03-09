@@ -1,9 +1,10 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
 import { api } from '@/lib/api-client';
-import { Product, Meta } from '@/types/api';
+import { Meta } from '@/types/api';
 
 import { QueryConfig } from '../../../lib/react-query';
+import { Product } from '../../admin/types/product';
 
 export const getProducts = (
   page = 1,

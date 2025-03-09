@@ -1,9 +1,19 @@
+'use client';
+
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 
-import { Order, OrderStatus } from '../types/order';
+import type { Order, OrderStatus } from '../types/order';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -20,6 +30,10 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 5;
+
   // Filter and sort orders
   const filteredOrders = orders
     .filter((order) => {
@@ -32,9 +46,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
     })
     .sort((a, b) => {
       if (sortField === 'total') {
-        return sortDirection === 'asc'
-          ? a.totalPrice - b.totalPrice
-          : b.totalPrice - a.totalPrice;
+        return sortDirection === 'asc' ? a.total - b.total : b.total - a.total;
       } else if (sortField === 'date') {
         return sortDirection === 'asc'
           ? new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -47,6 +59,19 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           : bValue?.localeCompare(aValue);
       }
     });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder,
+  );
+
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleSort = (field: keyof Order) => {
     if (sortField === field) {
@@ -249,8 +274,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {filteredOrders.length > 0 ? (
-                filteredOrders?.map((order) => (
+              {currentOrders.length > 0 ? (
+                currentOrders?.map((order) => (
                   <motion.tr
                     key={order.id}
                     variants={rowVariants}
@@ -266,7 +291,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                       {new Date(order.date).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      ${order.totalPrice}
+                      ${order.total}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <span
@@ -319,6 +344,78 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {filteredOrders.length > 0 && (
+          <div className="mt-4 flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Showing{' '}
+                  <span className="font-medium">{indexOfFirstOrder + 1}</span>{' '}
+                  to{' '}
+                  <span className="font-medium">
+                    {indexOfLastOrder > filteredOrders.length
+                      ? filteredOrders.length
+                      : indexOfLastOrder}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium">{filteredOrders.length}</span>{' '}
+                  results
+                </p>
+              </div>
+              <div>
+                <nav
+                  className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                  aria-label="Pagination"
+                >
+                  <button
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className={`relative inline-flex items-center rounded-l-md p-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                      currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''
+                    }`}
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft className="size-5" aria-hidden="true" />
+                  </button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)?.map(
+                    (number) => (
+                      <button
+                        key={number}
+                        onClick={() => paginate(number)}
+                        className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                          currentPage === number
+                            ? 'bg-indigo-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                            : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    ),
+                  )}
+
+                  <button
+                    onClick={() =>
+                      paginate(Math.min(totalPages, currentPage + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className={`relative inline-flex items-center rounded-r-md p-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                      currentPage === totalPages
+                        ? 'cursor-not-allowed opacity-50'
+                        : ''
+                    }`}
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="size-5" aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Order Details Modal */}
