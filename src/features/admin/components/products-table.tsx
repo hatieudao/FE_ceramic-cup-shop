@@ -34,7 +34,6 @@ const ProductsTable: React.FC = () => {
     page: currentPage,
     perPage: productsPerPage,
   });
-
   const products = data?.data || [];
   const totalPages = data?.meta?.totalPages || 1;
 
@@ -107,11 +106,6 @@ const ProductsTable: React.FC = () => {
     }
   };
 
-  const handleAddProduct = (product: any) => {
-    // For demo purposes, we'll just log the product
-    console.log('Adding product:', product);
-  };
-
   const tableVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -148,12 +142,7 @@ const ProductsTable: React.FC = () => {
   };
 
   return (
-    <motion.div
-      variants={tableVariants}
-      initial="hidden"
-      animate="visible"
-      className="overflow-hidden rounded-lg bg-white shadow-md"
-    >
+    <>
       <div className="p-6">
         <div className="mb-6 flex flex-col items-start justify-between md:flex-row md:items-center">
           <h2 className="mb-4 text-xl font-semibold md:mb-0">
@@ -584,7 +573,7 @@ const ProductsTable: React.FC = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
       />
-    </motion.div>
+    </>
   );
 };
 

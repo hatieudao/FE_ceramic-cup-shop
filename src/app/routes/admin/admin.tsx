@@ -10,11 +10,10 @@ export const clientLoader = (queryClient: QueryClient) => async () => {};
 
 const AdminRoute = () => {
   return (
-    <>
+    <div className="h-screen w-screen overflow-hidden">
       <Header />
-      <AdminDashboard />;
-      <Footer />
-    </>
+      <AdminDashboard />
+    </div>
   );
 };
 

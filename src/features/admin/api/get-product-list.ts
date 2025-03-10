@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { api } from '@/lib/api-client';
 import { handleUnauthorized } from '@/utils/handle-unauthorized';
 
 import { Meta } from '../../../types/api';
 import { Product } from '../../../types/product';
-
-import axios from '@/lib/axios';
 
 type ProductListResponse = {
   data: Product[];
@@ -22,13 +21,13 @@ export const getProductList = async ({
   perPage = 10,
 }: GetProductListParams): Promise<ProductListResponse> => {
   try {
-    const response = await axios.get('/api/admin/products', {
+    const response = await api.get('/products/admin/list', {
       params: {
         page,
         perPage,
       },
     });
-    return response.data;
+    return response;
   } catch (error) {
     if (handleUnauthorized(error)) {
       throw new Error('Unauthorized');

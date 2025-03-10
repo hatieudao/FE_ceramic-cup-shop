@@ -3,6 +3,7 @@ import { X, Upload, Plus, Trash } from 'lucide-react';
 import type React from 'react';
 import { useState, useRef } from 'react';
 
+import { useNotifications } from '../../../components/ui/notifications';
 import { useUploadImage } from '../../file-upload/upload-image';
 import { useCreateProduct } from '../api/create-product';
 
@@ -46,7 +47,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     [key: number]: { progress: number; error?: string };
   }>({});
   const createMutation = useCreateProduct();
-
+  const { addNotification } = useNotifications();
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const modalVariants = {
@@ -185,12 +186,22 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         setCurrentStep(1);
         setUploadStatus({});
         onClose();
+        addNotification({
+          title: 'Product added successfully',
+          type: 'success',
+        });
       } else {
-        toast.error('Failed to add product. Please try again.');
+        addNotification({
+          title: 'Failed to add product',
+          type: 'error',
+        });
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Failed to add product. Please try again.');
+      addNotification({
+        title: 'Failed to add product',
+        type: 'error',
+      });
     } finally {
       setIsSubmitting(false);
     }
