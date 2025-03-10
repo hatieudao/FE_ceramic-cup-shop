@@ -27,8 +27,8 @@ export const paths = {
       getHref: () => '/shop',
     },
     productDetail: {
-      path: 'product-detail',
-      getHref: () => '/product-detail',
+      path: 'product-detail/:productId',
+      getHref: (productId: string) => `/product-detail/${productId}`,
     },
     profile: {
       path: 'profile',

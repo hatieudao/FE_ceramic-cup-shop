@@ -1,12 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AxiosResponse } from 'axios';
 
 import { api } from '@/lib/api-client';
 import { MutationConfig } from '@/lib/react-query';
 
-import { Cart } from '../types/cart-item';
-
-import { CART_QUERY_KEY, getCartQueryOptions } from './get-cart';
+import { CART_QUERY_KEY } from './get-cart';
 
 // API function to update item quantity in the cart
 export const updateCartItemQuantity = async ({
@@ -22,13 +19,16 @@ type UseUpdateCartItemQuantityOptions = {
   mutationConfig?: MutationConfig<typeof updateCartItemQuantity>;
 };
 
-export const useUpdateCartItemQuantity = () => {
+export const useUpdateCartItemQuantity = ({
+  mutationConfig,
+}: UseUpdateCartItemQuantityOptions = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: updateCartItemQuantity,
     onSuccess: () => {
-      queryClient.invalidateQueries(getCartQueryOptions().queryKey); // ✅ Refetch cart
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY }); // ✅ Refetch cart
     },
+    ...mutationConfig,
   });
 };

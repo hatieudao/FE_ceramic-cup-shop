@@ -1,12 +1,31 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
-import { api } from '@/lib/api-client'; // Import schema
 import { MutationConfig } from '@/lib/react-query';
+import { handleUnauthorized } from '@/utils/handle-unauthorized';
 
-import { AddressFormValues } from '../types/order-adress';
+import { api } from './../../../lib/api-client';
 
-export const createOrder = ({ data }: { data: AddressFormValues }) => {
-  return api.post('/orders/submit', data);
+interface CreateOrderData {
+  cartId: string;
+  shippingAddress: {
+    address: string;
+    city: string;
+    country: string;
+    postalCode: string;
+  };
+  paymentMethod: string;
+}
+
+export const createOrder = async (data: CreateOrderData) => {
+  try {
+    const response = await api.post('/orders/submit', data);
+    return response.data;
+  } catch (error) {
+    if (handleUnauthorized(error)) {
+      throw new Error('Unauthorized');
+    }
+    throw error;
+  }
 };
 
 type UseCreateOrderOptions = {
@@ -18,16 +37,11 @@ export const useCreateOrder = ({
   mutationConfig,
   onSuccessCallback,
 }: UseCreateOrderOptions) => {
-  const queryClient = useQueryClient();
-
   const { onSuccess, ...restConfig } = mutationConfig || {};
 
   return useMutation({
     mutationFn: createOrder,
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({
-        queryKey: ['orders'],
-      });
       onSuccess?.(...args);
       onSuccessCallback?.();
     },

@@ -5,14 +5,10 @@ import { Link, useSearchParams } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Form, Input, Label } from '@/components/ui/form';
 import { paths } from '@/config/paths';
-import { useRegister, registerInputSchema } from '@/lib/auth';
-import { Team } from '@/types/api';
+import { RegisterInput, registerInputSchema, useRegister } from '@/lib/auth';
 
 type RegisterFormProps = {
   onSuccess: () => void;
-  chooseTeam: boolean;
-  setChooseTeam: () => void;
-  teams?: Team[];
 };
 
 export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
@@ -20,7 +16,10 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');
   const [showPassword, setShowPassword] = React.useState(false);
-
+  const handleSubmit = (values: RegisterInput) => {
+    console.log('Form submitted with values > :', values);
+    registering.mutate(values);
+  };
   return (
     <div className="mx-auto w-full max-w-md space-y-8 p-6">
       <div className="space-y-2 text-center">
@@ -30,43 +29,20 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
         </p>
       </div>
 
-      <Form
-        onSubmit={(values) => {
-          registering.mutate(values);
-        }}
-        schema={registerInputSchema}
-        options={{
-          shouldUnregister: true,
-        }}
-      >
+      <Form onSubmit={handleSubmit} schema={registerInputSchema}>
         {({ register, formState }) => (
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="name">Name</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 size-5 text-muted-foreground" />
                 <Input
-                  id="firstName"
+                  id="name"
                   type="text"
                   className="pl-10"
                   placeholder="John"
-                  error={formState.errors['firstName']}
-                  registration={register('firstName')}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 size-5 text-muted-foreground" />
-                <Input
-                  id="lastName"
-                  type="text"
-                  className="pl-10"
-                  placeholder="Doe"
-                  error={formState.errors['lastName']}
-                  registration={register('lastName')}
+                  error={formState.errors['name']}
+                  registration={register('name')}
                 />
               </div>
             </div>
@@ -114,7 +90,8 @@ export const RegisterForm = ({ onSuccess }: RegisterFormProps) => {
             <Button
               isLoading={registering.isPending}
               type="submit"
-              className="w-full"
+              className="w-full disabled:opacity-50"
+              disabled={registering.isPending}
             >
               {registering.isPending ? 'Creating account...' : 'Create account'}
             </Button>

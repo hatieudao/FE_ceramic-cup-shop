@@ -1,20 +1,24 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type React from 'react';
 
+import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/utils/format';
 
+import { getImageUrl } from '../../../utils/get-image-url';
 import type { Order } from '../types/order';
 
 interface OrderItemProps {
   order: Order;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  onCancelOrder?: () => void;
 }
 
 const OrderItem: React.FC<OrderItemProps> = ({
   order,
   isExpanded,
   onToggleExpand,
+  onCancelOrder,
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -36,10 +40,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
 
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow-md">
-      <div
-        className="cursor-pointer p-4 transition-colors hover:bg-gray-50"
-        onClick={onToggleExpand}
-      >
+      <div className="flex items-center justify-between p-4">
         <div className="flex flex-wrap items-center justify-between">
           <div className="mb-2 flex items-center space-x-4 sm:mb-0">
             <span className="text-sm text-gray-500">
@@ -79,6 +80,23 @@ const OrderItem: React.FC<OrderItemProps> = ({
               <polyline points="6 9 12 15 18 9"></polyline>
             </motion.svg>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {order.status === 'pending' && onCancelOrder && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCancelOrder();
+              }}
+            >
+              Cancel Order
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onToggleExpand}>
+            {isExpanded ? 'Show Less' : 'Show More'}
+          </Button>
         </div>
       </div>
 
@@ -150,9 +168,7 @@ const OrderItem: React.FC<OrderItemProps> = ({
                       >
                         <div className="mx-auto size-24 shrink-0 overflow-hidden rounded-md bg-gray-100 sm:mx-0">
                           <img
-                            src={
-                              item.productType.imageUrl || '/placeholder.svg'
-                            }
+                            src={getImageUrl(item.productType.imageUrl)}
                             alt={item.productType.product.name}
                             className="size-full object-cover"
                             onError={(e) => {

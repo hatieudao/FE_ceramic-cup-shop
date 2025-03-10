@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 
 import { paths } from '../../../config/paths';
 import { useUser } from '../../../lib/auth';
+import { getImageUrl } from '../../../utils/get-image-url';
 import { useCart } from '../api/get-cart';
 import { useUpdateCartItemQuantity } from '../api/update-cart-item';
 
@@ -104,10 +105,7 @@ export const CartList: React.FC = () => {
                 </button>
                 <div className="mr-4 size-20 shrink-0 border">
                   <img
-                    src={
-                      item.productType.imageUrl ||
-                      'assets/images/placeholder.svg'
-                    }
+                    src={getImageUrl(item.productType.imageUrl)}
                     alt={item.productType.name}
                     className="size-full object-cover"
                   />

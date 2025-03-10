@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 import { SERVER_IMAGE_URL } from '../../../types/product';
+import { getImageUrl } from '../../../utils/get-image-url';
 import { useAddToCart } from '../../cart/api/add-cart-item';
 import { useCart } from '../../cart/api/use-cart';
 import { useProduct } from '../api/get-product';
@@ -116,33 +117,32 @@ const ProductDetailContent = ({
   };
 
   return (
-    <div className="grid gap-0 md:grid-cols-2">
-      {/* Product Image Section */}
-      <div className="relative bg-gray-100">
+    <div className="grid h-[500px] gap-0 border md:grid-cols-2">
+      {/* Product Image Section - Fixed height */}
+      <div className="relative h-[500px] overflow-hidden bg-gray-100">
         {selectedType?.imageUrl ? (
           <img
-            src={
-              selectedType.imageUrl &&
-              selectedType.imageUrl.startsWith('/uploads')
-                ? SERVER_IMAGE_URL + selectedType.imageUrl
-                : selectedType.imageUrl
-            }
+            src={getImageUrl(selectedType.imageUrl) || '/placeholder.svg'}
             alt={selectedType.name || 'Product'}
-            className="h-auto w-full"
+            className="size-full object-cover"
           />
         ) : (
-          <ProductImageGallery
-            images={
-              productImages.length > 0 ? productImages : ['fallback-image.jpg']
-            }
-            useAdvanced={true}
-            effect="fade"
-          />
+          <div className="size-full">
+            <ProductImageGallery
+              images={
+                productImages.length > 0
+                  ? productImages
+                  : ['/placeholder.svg?height=600&width=600']
+              }
+              useAdvanced={true}
+              effect="fade"
+            />
+          </div>
         )}
       </div>
 
-      {/* Product Details Section */}
-      <div className="p-6">
+      {/* Product Details Section - Fixed height with scroll if needed */}
+      <div className="h-[500px] overflow-y-auto p-6">
         {/* Rating (Static for now) */}
         <div className="mb-4 flex gap-1">
           {[1, 2, 3].map((i) => (
@@ -166,7 +166,7 @@ const ProductDetailContent = ({
         {/* Price */}
         <div className="mb-6 text-xl font-bold">
           {selectedType?.price
-            ? `$${parseFloat(selectedType.price).toFixed(2)}`
+            ? `$${Number.parseFloat(selectedType.price).toFixed(2)}`
             : 'Select a type'}
         </div>
 
@@ -185,9 +185,12 @@ const ProductDetailContent = ({
                       ? 'bg-black text-white'
                       : 'hover:bg-gray-50'
                   }`}
-                  onClick={() => setSelectedType(type)}
+                  onClick={() =>
+                    setSelectedType(type === selectedType ? null : type)
+                  }
+                  disabled={type.stock === 0}
                 >
-                  {type.name} (${parseFloat(type.price).toFixed(2)})
+                  {type.name} (${Number.parseFloat(type.price).toFixed(2)})
                 </button>
               ))
             ) : (
@@ -233,9 +236,9 @@ const ProductDetailContent = ({
             </button>
           </div>
           <button
-            className="rounded bg-red-500 px-6 py-2 text-white hover:bg-red-600"
+            className="rounded bg-red-500 px-6 py-2 text-white hover:bg-red-600 disabled:opacity-50"
             onClick={handleAddToCart}
-            disabled={!selectedType} // Disable if no type is selected
+            disabled={!selectedType}
           >
             ADD TO CART
           </button>

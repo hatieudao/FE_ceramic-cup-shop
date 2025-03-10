@@ -1,20 +1,22 @@
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import { Form, Input } from '@/components/ui/form';
 import { paths } from '@/config/paths';
-import { useLogin, loginInputSchema } from '@/lib/auth';
+import { loginInputSchema, useLogin } from '@/lib/auth';
 
 type LoginFormProps = {
   onSuccess: () => void;
+  onError: (error: any) => void;
 };
 
-export const LoginForm = ({ onSuccess }: LoginFormProps) => {
+export const LoginForm = ({ onSuccess, onError }: LoginFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const login = useLogin({
     onSuccess,
+    onError,
   });
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo');

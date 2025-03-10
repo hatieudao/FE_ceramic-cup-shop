@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { useNavigate } from 'react-router';
 
 import Footer from '../../../app/routes/landing/footer';
 import { useCart } from '../../cart/api/get-cart';
@@ -77,6 +78,8 @@ const CheckoutPage: React.FC = () => {
     setIsConfirmModalOpen(true);
   };
 
+  const navigate = useNavigate();
+
   const handleConfirmOrder = async () => {
     // Format the data to match the Address table structure
     const addressData = {
@@ -96,7 +99,13 @@ const CheckoutPage: React.FC = () => {
     console.log('Complete form data:', getValues());
     // Simulate a successful order placement
     setIsConfirmModalOpen(false);
-    createOrder({ data: getValues() });
+    createOrder({
+      data: getValues(),
+      onSuccessCallback: () => {
+        setIsSuccessModalOpen(true);
+        navigate('/');
+      },
+    });
   };
 
   // Add this function to handle closing the success modal

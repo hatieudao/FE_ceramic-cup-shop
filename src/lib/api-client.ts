@@ -38,12 +38,12 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    const message = error.response?.data?.message || error.message;
-    useNotifications.getState().addNotification({
-      type: 'error',
-      title: 'Error',
-      message,
-    });
+    // const message = error.response?.data?.message || error.message;
+    // useNotifications.getState().addNotification({
+    //   type: 'error',
+    //   title: 'Error',
+    //   message,
+    // });
 
     if (error.response?.status === 401) {
       const searchParams = new URLSearchParams();

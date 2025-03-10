@@ -1,5 +1,6 @@
 import { CheckCircle } from 'lucide-react';
 import type React from 'react';
+import { useNavigate } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +22,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   onClose,
   orderNumber = '12345678',
 }) => {
+  const navigate = useNavigate();
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
@@ -43,7 +45,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
               </p>
             </div>
             <Button
-              onClick={onClose}
+              onClick={() => navigate('/shop')}
               className="w-full bg-green-600 hover:bg-green-700"
             >
               Continue Shopping
